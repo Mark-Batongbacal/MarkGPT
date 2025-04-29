@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "MarkGPT (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "MarkGPT (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
