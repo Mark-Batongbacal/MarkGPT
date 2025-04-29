@@ -9,7 +9,46 @@
     mc:Ignorable="d"
     Title="MarkGPT">
 
-    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-        <Button x:Name="myButton" Click="myButton_Click">Click Me</Button>
-    </StackPanel>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            
+            <RowDefinition Height="*"/>
+            
+            <RowDefinition Height="Auto"/>
+           
+        </Grid.RowDefinitions>
+
+        <ScrollViewer Grid.Row="1" Padding="12">
+            <StackPanel x:Name="ChatStack" Spacing="12" Background="#F5F5F5">
+                <TextBlock Text="Hello! How can I help you today?" Foreground="Black"  Padding="10" />
+                
+            </StackPanel>
+        </ScrollViewer>
+
+
+        <Grid Grid.Row="2" Padding="12" Background="#F5F5F5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBox x:Name="InputBox" 
+             Grid.Column="1"
+             PlaceholderText="Type your message..." 
+             MinHeight="40" 
+             Width="400"
+             TextWrapping="Wrap" 
+             AcceptsReturn="True" 
+             VerticalAlignment="Center" 
+             Margin="0,0,8,0"/>
+
+            <Button Grid.Column="2" 
+            Content="Send" 
+            VerticalAlignment="Center"
+            Click="Send_Click"/>
+        </Grid>
+    </Grid>
 </Window>

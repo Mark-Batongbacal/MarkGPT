@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -28,9 +29,27 @@ namespace MarkGPT
             this.InitializeComponent();
         }
 
-        private void myButton_Click(object sender, RoutedEventArgs e)
+       
+
+        private void Send_Click(object sender, RoutedEventArgs e)
         {
-            myButton.Content = "Clicked";
+            var message = InputBox.Text.Trim();
+            if (!string.IsNullOrEmpty(message))
+            {
+                var textBlock = new TextBlock
+                {
+                    Text = message,
+                    Foreground = new SolidColorBrush(Colors.Black),
+                    TextWrapping = TextWrapping.Wrap,
+                    Padding = new Thickness(10),
+                    Margin = new Thickness(0, 0, 0, 6),
+                    HorizontalAlignment = HorizontalAlignment.Right
+                };
+
+                ChatStack.Children.Add(textBlock);
+                InputBox.Text = "";
+            }
         }
+
     }
 }
