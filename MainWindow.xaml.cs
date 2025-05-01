@@ -27,29 +27,12 @@ namespace MarkGPT
         public MainWindow()
         {
             this.InitializeComponent();
+            this.Content = new MainPage();
         }
 
-       
 
-        private void Send_Click(object sender, RoutedEventArgs e)
-        {
-            var message = InputBox.Text.Trim();
-            if (!string.IsNullOrEmpty(message))
-            {
-                var textBlock = new TextBlock
-                {
-                    Text = message,
-                    Foreground = new SolidColorBrush(Colors.Black),
-                    TextWrapping = TextWrapping.Wrap,
-                    Padding = new Thickness(10),
-                    Margin = new Thickness(0, 0, 0, 6),
-                    HorizontalAlignment = HorizontalAlignment.Right
-                };
+        
 
-                ChatStack.Children.Add(textBlock);
-                InputBox.Text = "";
-            }
-        }
 
     }
 }

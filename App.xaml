@@ -8,8 +8,10 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
-                <!-- Other merged dictionaries here -->
+                
             </ResourceDictionary.MergedDictionaries>
+
+            <FontFamily x:Key="DefaultFontFamily">ms-appx:///Fonts/#Inter</FontFamily>
             <!-- Other app resources here -->
         </ResourceDictionary>
     </Application.Resources>
