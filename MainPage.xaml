@@ -21,20 +21,6 @@
         <ScrollViewer Grid.Row="1" Padding="12">
             <StackPanel x:Name="ChatStack" Spacing="12" Background="#2C2C2C" Padding="10">
 
-                <Border Background="#333333"
-                    CornerRadius="25"
-                    Padding="15"
-                    HorizontalAlignment="Left">
-                    <TextBlock Text="Hello! How can I help you today?"
-                       Foreground="#F5F5F5"
-                       FontFamily="ms-appx:///Fonts/Inter-VariableFont_opsz,wght.ttf#Inter"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       FontWeight="SemiBold"
-                       FontSize="17"/>
-                </Border>
-
-
             </StackPanel>
         </ScrollViewer>
 
