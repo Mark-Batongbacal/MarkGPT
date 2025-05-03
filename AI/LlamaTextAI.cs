@@ -10,7 +10,7 @@ using System.Diagnostics;
 
 namespace MarkGPT.AI
 {
-    public static class DeepSeekTextAI
+    public static class LlamaTextAI
     {
         private static readonly HttpClient httpClient = new HttpClient();
 
@@ -19,12 +19,14 @@ namespace MarkGPT.AI
             new
             {
                 role = "system",
-                content = @"
-You are a numerical methods expert. Provide only the necessary calculation steps, unless the last message is a greeting like ""hi.""
+                content = @"You are a numerical methods expert. Provide only the necessary calculation steps
+if asked about the meaning, as long as it is related to numerical methods, give it out
 Your name is MarkGPT. Greet only when asked or when the user's message is a greeting.
-Note on the answer cheerfully and include emojis where appropriate.
+Note on the answer cheerfully, always humanize your constructs and include emojis where appropriate.
 
-strictly Don't use * or ` for text modification
+if asked for an example, do not provide the encoded output, you can provide the root or answer though
+
+Don't use * or ` for text modification
 
 If a user greets, greet them properly back. If the user asks for help without giving a specific problem, tell them they must provide one. If a user asks for a non-related question, inform them that you are a numerical methods AI and provide them with the available methods.
 
@@ -84,6 +86,9 @@ output: 120219|1S|0.0|4.0|pow(x,2)-5|0.001
 1S - Secant, xl = 0, xr = 5, fx = pow(x,2)-5, error = 0.001
 
 After showing 120219, stop. Don't say anything else. Don't explain. Don't reason.
+
+Please respond without using bold text or asterisks
+
 "
 
 
@@ -96,19 +101,19 @@ After showing 120219, stop. Don't say anything else. Don't explain. Don't reason
             conversationHistory.Add(new { role = "user", content = prompt });
 
             string apiKey = "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";
-            
+            if (string.IsNullOrEmpty(apiKey)) return "Missing NEBIUS_API_KEY.";
 
             var requestBody = new
             {
-                model = "nvidia/llama-3.3-nemotron-super-49b-v1",
-                temperature = 0.3,
+                model = "nvidia/llama-3.1-nemotron-ultra-253b-v1",
+                temperature = 1,
                 top_p = 0.9,
                 frequency_penalty = 0,
                 presence_penalty = 0,
                 stream = false,
                 messages = conversationHistory
             };
-
+          
             var json = JsonConvert.SerializeObject(requestBody);
             var content = new StringContent(json, Encoding.UTF8);
             content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/json");
@@ -125,17 +130,17 @@ After showing 120219, stop. Don't say anything else. Don't explain. Don't reason
 
             try
             {
-
+               
                 response = await httpClient.SendAsync(request);
                 response.EnsureSuccessStatusCode();
 
                 var responseString = await response.Content.ReadAsStringAsync();
                 dynamic result = JsonConvert.DeserializeObject(responseString);
 
-
+            
                 string reply = result?.choices?[0]?.message?.content ?? "I'm sorry MarkGPT is sleeping for now 😢😢😴😴";
 
-
+             
                 conversationHistory.Add(new { role = "assistant", content = reply });
 
                 Debug.WriteLine("Bot Response: " + reply);

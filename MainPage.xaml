@@ -8,7 +8,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     RequestedTheme="Light">
-    <Grid Background="#333333">
+
+    <Grid Background="#212121">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
 
@@ -18,14 +19,14 @@
 
         </Grid.RowDefinitions>
 
-        <ScrollViewer Grid.Row="1" Padding="12">
-            <StackPanel x:Name="ChatStack" Spacing="12" Background="#2C2C2C" Padding="10">
+        <ScrollViewer x:Name="scrollViewer" Grid.Row="1" Padding="12">
+            <StackPanel x:Name="ChatStack" Spacing="12" Background="#212121" Padding="10">
 
             </StackPanel>
         </ScrollViewer>
 
 
-        <Grid Grid.Row="2" Padding="12" Background="#333333">
+        <Grid Grid.Row="2" Padding="12" Background="#212121">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
@@ -34,24 +35,21 @@
             </Grid.ColumnDefinitions>
 
             <TextBox x:Name="InputBox"
-     Background="White"
+     Background="#303030"
      Grid.Column="1"
      PlaceholderText="Type your message..."
      MinHeight="40"
      Width="400"
      TextWrapping="Wrap"
+     Foreground="White"
      AcceptsReturn="True"
      VerticalAlignment="Center"
      Margin="0,0,8,0">
-                <TextBox.Resources>
-                    <SolidColorBrush x:Key="TextBoxBackground" Color="Black"/>
-                    <SolidColorBrush x:Key="TextBoxBackgroundPointerOver" Color="Gray"/>
-                    <SolidColorBrush x:Key="TextBoxBackgroundFocused" Color="DarkGray"/>
-                </TextBox.Resources>
             </TextBox>
 
             <Button Grid.Column="2" 
-    Background="White"
+    Background="#303030"
+    Foreground="Gray"
     Content="Send" 
     VerticalAlignment="Center"
     Click="Send_Click"/>

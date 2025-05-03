@@ -22,6 +22,9 @@ using Newtonsoft.Json;
 using System.Threading.Tasks;
 using MarkGPT.AI;
 using MarkGPT.Methods;
+using System.Diagnostics;
+using static MarkGPT.Methods.StepModels;
+using MarkGPT.Helpers;
 
 namespace MarkGPT
 {
@@ -34,6 +37,11 @@ namespace MarkGPT
         {
             this.InitializeComponent();
             ShowRandomGreeting();
+        }
+
+        public async Task getRoot(string input)
+        {
+            await ShowBotMessageAsync($"Please get only the root of {input}, don't give the solution, answer cheerfully" );
         }
 
         private List<string> greetings = new List<string>
@@ -55,10 +63,43 @@ namespace MarkGPT
             "Hi there! What problem are we solving today? Let’s pick a method and get started! 😊📈"
         };
 
-
-        private async Task ShowBotMessageAsync(string message)
+        private async void ScrollToBottom()
         {
-            var botResponse = await DeepSeekTextAI.GetDeepSeekResponseAsync(message);
+            await Task.Delay(50);
+            scrollViewer.ChangeView(null, scrollViewer.ExtentHeight, null);
+
+        }
+
+        
+private async Task ShowBotMessageAsync(string message)
+        {
+            string botResponse;
+
+            botResponse = await LlamaTextAI.GetLlamaResponseAsync(message);
+            //botResponse = await DeepSeekTextAI.GetLlamaResponseAsync(message);
+
+            if (botResponse.Contains("120219"))
+            {
+                string tempresp = botResponse;
+                string[] parts = botResponse.Split('|');
+
+                if (parts.Length >= 6)
+                {
+                    try
+                    {
+                        var (msg, display) = MethodDispatcher.Dispatch(parts, ChatStack);
+                        botResponse = msg;
+                        display?.Invoke();
+                        await getRoot(tempresp);
+                    }
+                    catch
+                    {
+                        Debug.WriteLine(botResponse);
+                        botResponse = "There was an error processing your input.";
+
+                    }
+                }
+            }
 
             var botTextBlock = new TextBlock
             {
@@ -73,7 +114,7 @@ namespace MarkGPT
 
             var botBorder = new Border
             {
-                Background = new SolidColorBrush(Color.FromArgb(255, 51, 51, 51)),
+                //Background = new SolidColorBrush(Color.FromArgb(255, 51, 51, 51)),
                 CornerRadius = new CornerRadius(25),
                 Padding = new Thickness(15),
                 Margin = new Thickness(0, 0, 0, 6),
@@ -83,6 +124,7 @@ namespace MarkGPT
             };
 
             ChatStack.Children.Add(botBorder);
+            ScrollToBottom();
         }
 
         private async void Send_Click(object sender, RoutedEventArgs e)
@@ -90,7 +132,6 @@ namespace MarkGPT
             var message = InputBox.Text.Trim();
             if (!string.IsNullOrEmpty(message))
             {
-                //AiResponse = 
 
                 var textBlock = new TextBlock
                 {
@@ -116,6 +157,7 @@ namespace MarkGPT
 
 
                 ChatStack.Children.Add(border);
+                ScrollToBottom();
                 InputBox.Text = "";
 
 
@@ -132,7 +174,6 @@ namespace MarkGPT
             Random rand = new Random();
             string greeting = greetings[rand.Next(greetings.Count)];
 
-            // Create a text block to display the greeting
             var textBlock = new TextBlock
             {
                 Text = greeting,
@@ -144,10 +185,9 @@ namespace MarkGPT
                 FontFamily = new FontFamily("ms-appx:///Fonts/Inter-VariableFont_opsz,wght.ttf#Inter")
             };
 
-            // Create a border around the text block (like a message bubble)
             var border = new Border
             {
-                Background = new SolidColorBrush(Color.FromArgb(255, 51, 51, 51)),
+                //Background = new SolidColorBrush(Color.FromArgb(255, 51, 51, 51)),
                 CornerRadius = new CornerRadius(25),
                 Padding = new Thickness(15),
                 Margin = new Thickness(0, 0, 0, 6),
@@ -156,12 +196,8 @@ namespace MarkGPT
                 MaxWidth = 1000
             };
 
-            // Add the greeting to the chat stack
             ChatStack.Children.Add(border);
         }
-
-
-
     }
 }
 

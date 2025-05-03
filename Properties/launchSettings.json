@@ -1,7 +1,8 @@
 {
   "profiles": {
     "MarkGPT (Package)": {
-      "commandName": "MsixPackage"
+      "commandName": "MsixPackage",
+      "doNotLaunchApp": false
     },
     "MarkGPT (Unpackaged)": {
       "commandName": "Project"
