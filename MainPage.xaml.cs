@@ -25,6 +25,7 @@ using MarkGPT.Methods;
 using System.Diagnostics;
 using static MarkGPT.Methods.StepModels;
 using MarkGPT.Helpers;
+using System.Text.RegularExpressions;
 
 namespace MarkGPT
 {
@@ -39,9 +40,9 @@ namespace MarkGPT
             ShowRandomGreeting();
         }
 
-        public async Task getRoot(string input)
+        public async Task getMessage(string message)
         {
-            await ShowBotMessageAsync($"Please get only the root of {input}, don't give the solution, answer cheerfully" );
+            await ShowBotMessageAsync(message);
         }
 
         private List<string> greetings = new List<string>
@@ -63,7 +64,7 @@ namespace MarkGPT
             "Hi there! What problem are we solving today? Let’s pick a method and get started! 😊📈"
         };
 
-        private async void ScrollToBottom()
+        public async void ScrollToBottom()
         {
             await Task.Delay(50);
             scrollViewer.ChangeView(null, scrollViewer.ExtentHeight, null);
@@ -71,70 +72,12 @@ namespace MarkGPT
         }
 
 
-        private async Task ShowBotMessageAsync(string message)
+        public async Task ShowBotMessageAsync(string message)
         {
-            string botResponse;
+            string botResponse = await DeepSeekTextAI.GetLlamaResponseAsync(message);
+        
+            string tempresp = botResponse;
 
-            //botResponse = await LlamaTextAI.GetLlamaResponseAsync(message);
-            botResponse = await DeepSeekTextAI.GetLlamaResponseAsync(message);
-
-            if (botResponse.Contains("120219"))
-            {
-                int startIndex = botResponse.IndexOf("120219");
-                int endIndex = botResponse.IndexOf("*", startIndex);
-
-                string tempresp = botResponse;
-
-                if (startIndex != -1 && endIndex != -1)
-                {
-
-                    string result = botResponse.Substring(startIndex, endIndex - startIndex);
-
-                    string[] parts = result.Split('|');
-
-                    if (parts.Length >= 6)
-                    {
-                        try
-                        {
-                            var botTextBloc = new TextBlock
-                            {
-                                Text = botResponse,
-                                TextWrapping = TextWrapping.Wrap,
-                                HorizontalAlignment = HorizontalAlignment.Left,
-                                FontSize = 17,
-                                FontWeight = FontWeights.SemiBold,
-                                Foreground = new SolidColorBrush(Colors.White),
-                                FontFamily = new FontFamily("ms-appx:///Fonts/Inter-VariableFont_opsz,wght.ttf#Inter")
-                            };
-
-                            var botBorde = new Border
-                            {
-                                //Background = new SolidColorBrush(Color.FromArgb(255, 51, 51, 51)),
-                                CornerRadius = new CornerRadius(25),
-                                Padding = new Thickness(15),
-                                Margin = new Thickness(0, 0, 0, 6),
-                                Child = botTextBloc,
-                                HorizontalAlignment = HorizontalAlignment.Left,
-                                MaxWidth = 1000
-                            };
-
-                            ChatStack.Children.Add(botBorde);
-                            ScrollToBottom();
-                            var (msg, display) = MethodDispatcher.Dispatch(parts, ChatStack);
-                            botResponse = msg;
-
-                            display?.Invoke();
-                            await getRoot(tempresp);
-                        }
-                        catch
-                        {
-                            Debug.WriteLine(botResponse);
-                            botResponse = "There was an error processing your input.";
-
-                        }
-                    }
-                }
-            }
             var botTextBlock = new TextBlock
             {
                 Text = botResponse,
@@ -148,7 +91,6 @@ namespace MarkGPT
 
             var botBorder = new Border
             {
-                //Background = new SolidColorBrush(Color.FromArgb(255, 51, 51, 51)),
                 CornerRadius = new CornerRadius(25),
                 Padding = new Thickness(15),
                 Margin = new Thickness(0, 0, 0, 6),
@@ -159,7 +101,34 @@ namespace MarkGPT
 
             ChatStack.Children.Add(botBorder);
             ScrollToBottom();
+
+            var matches = Regex.Matches(botResponse, @"120219\|[^:\n]+");
+
+            for (int i = 0; i < matches.Count; i++)
+            {
+                string result = matches[i].Value;
+                string[] parts = result.Split('|');
+
+                if (parts.Length >= 6)
+                {
+                    try
+                    {
+                        var (msg, display) = MethodDispatcher.Dispatch(this, parts, ChatStack);
+
+                        display?.Invoke();
+
+                        // Trigger summary only on the last match
+                        if (i == matches.Count - 1)
+                            await getMessage("provide a summary of what happened for the solving process");
+                    }
+                    catch
+                    {
+                        Debug.WriteLine($"Error processing: {result}");
+                    }
+                }
+            }
         }
+
 
         private async void Send_Click(object sender, RoutedEventArgs e)
         {
@@ -198,9 +167,6 @@ namespace MarkGPT
                 ShowBotMessageAsync(message);
                 
             }
-
-
-
         }
 
         private void ShowRandomGreeting()

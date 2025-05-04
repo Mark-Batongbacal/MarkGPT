@@ -58,7 +58,11 @@ If any are missing, ask for the missing ones.
 If all values are complete and valid, output this:
 120219|METHOD|value1|value2|function|error*
 
-remember to include the 120219 and * as these are the terminating characters
+remember to include the 120219 and : as these are the terminating characters
+
+Never output if the newton raphson has 0 as its parameter
+
+If prompted to provide your own parameters, never provide invalid ones
 
 Never output 120219 unless all the required parameters are valid.
 If they're not, respond appropriately.
@@ -70,16 +74,16 @@ Accepted functions: pow(x,n), sqrt(x), cbrt(x), exp(x), sin(x), cos(x), tan(x) a
 
 Examples:
 input: Bisection method, x^2 - 5, 0 5, 1B x^2-5 0 5
-output: 120219|1B|0.0|5.0|pow(x,2)-5|0.001*
+output: 120219|1B|0.0|5.0|pow(x,2)-5|0.001:
 
 input: Bisection method, x^2 - 4, 0 1
 output: Unavailable parameters, please enter another value for upper and lower limits
 
-input: Newton-Raphson method, x^2 - 5, 0
-output: 120219|1NR|0.0|pow(x,2)-5|2*x|0.001*
+input: Newton-Raphson method, x^2 - 5, 1
+output: 120219|1NR|1.0|pow(x,2)-5|2*x|0.001:
 
 input: Secant method, x^2 - 5, 0 4
-output: 120219|1S|0.0|4.0|pow(x,2)-5|0.001*
+output: 120219|1S|0.0|4.0|pow(x,2)-5|0.001:
 
 
 "

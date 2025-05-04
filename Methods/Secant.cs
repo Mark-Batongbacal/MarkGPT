@@ -38,7 +38,8 @@ namespace MarkGPT.Methods
                         X0 = x0,
                         X1 = x1,
                         X2 = x2,
-                        Fx2 = fx2
+                        Fx2 = fx2,
+                        Root = x2
                     });
 
                     x0 = x1;

@@ -10,7 +10,7 @@ namespace MarkGPT.Helpers
 {
     public static class MethodDispatcher
     {
-        public static (string botMessage, Action displayAction) Dispatch(string[] parts, StackPanel chatStack)
+        public static (string botMessage, Action displayAction) Dispatch(MainPage page,string[] parts, StackPanel chatStack)
         {
             string methodCode = parts[1];
             switch (methodCode)
@@ -21,8 +21,8 @@ namespace MarkGPT.Helpers
                     string fx = parts[4];
                     double error = Convert.ToDouble(parts[5]);
                     var bisResult = Bisection.Solve(xl, xr, error, fx);
-                    return ("Here are the results using the Bisection Method! ✅", () =>
-                        DisplayHelper.DisplayBisection(chatStack, bisResult));
+                    return (null, () =>
+                        DisplayHelper.DisplayBisection(page, chatStack, bisResult));
 
                 case "1NR":
                     double x0 = Convert.ToDouble(parts[2]);
@@ -30,8 +30,8 @@ namespace MarkGPT.Helpers
                     string dfx_nr = parts[4];
                     double error_nr = Convert.ToDouble(parts[5]);
                     var nrResult = NewtonRaphson.Solve(x0, error_nr, fx_nr, dfx_nr);
-                    return ("Here are the results using the Newton-Raphson Method! ✅", () =>
-                        DisplayHelper.DisplayNewton(chatStack, nrResult));
+                    return (null, () =>
+                        DisplayHelper.DisplayNewton(page, chatStack, nrResult));
 
                 case "1S":
                     double x0_s = Convert.ToDouble(parts[2]);
@@ -39,8 +39,8 @@ namespace MarkGPT.Helpers
                     string fx_s = parts[4];
                     double error_s = Convert.ToDouble(parts[5]);
                     var secResult = Secant.Solve(x0_s, x1_s, error_s, fx_s);
-                    return ("Here are the results using the Secant Method! ✅", () =>
-                        DisplayHelper.DisplaySecant(chatStack, secResult));
+                    return (null, () =>
+                        DisplayHelper.DisplaySecant(page, chatStack, secResult));
 
                 //case "1NS":
                 //    
