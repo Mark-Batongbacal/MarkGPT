@@ -68,9 +68,12 @@ namespace MarkGPT.Helpers
             table.Children.Add(new TextBlock
             {
                 Text = string.Join(" | ", headers),
-                FontWeight = FontWeights.Bold,
-                Margin = new Thickness(0, 0, 0, 4),
-                Foreground = new SolidColorBrush(Colors.White)
+                TextWrapping = TextWrapping.Wrap,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                FontSize = 17,
+                FontWeight = FontWeights.SemiBold,
+                Foreground = new SolidColorBrush(Colors.White),
+                FontFamily = new FontFamily("ms-appx:///Fonts/Inter-VariableFont_opsz,wght.ttf#Inter")
             });
 
             foreach (var row in rows)
@@ -78,22 +81,16 @@ namespace MarkGPT.Helpers
                 table.Children.Add(new TextBlock
                 {
                     Text = string.Join(" | ", row),
-                    Foreground = new SolidColorBrush(Colors.White)
+                    TextWrapping = TextWrapping.Wrap,
+                    HorizontalAlignment = HorizontalAlignment.Left,
+                    FontSize = 17,
+                    FontWeight = FontWeights.SemiBold,
+                    Foreground = new SolidColorBrush(Colors.White),
+                    FontFamily = new FontFamily("ms-appx:///Fonts/Inter-VariableFont_opsz,wght.ttf#Inter")
                 });
             }
 
-            var border = new Border
-            {
-                Background = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 51, 51, 51)),
-                CornerRadius = new CornerRadius(25),
-                Padding = new Thickness(15),
-                Margin = new Thickness(0, 0, 0, 6),
-                Child = table,
-                HorizontalAlignment = HorizontalAlignment.Left,
-                MaxWidth = 1000
-            };
-
-            chatStack.Children.Add(border);
+            chatStack.Children.Add(table);
         }
     }
 }

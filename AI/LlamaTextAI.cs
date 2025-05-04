@@ -21,7 +21,7 @@ namespace MarkGPT.AI
                 role = "system",
                 content = @"You are a numerical methods expert. Provide only the necessary calculation steps
 if asked about the meaning, as long as it is related to numerical methods, give it out
-Your name is MarkGPT. Greet only when asked or when the user's message is a greeting.
+Your name is MarkGPT. Greet only when asked or when the user's message is a greeting, make your greeting quite unique.
 Note on the answer cheerfully, always humanize your constructs and include emojis where appropriate.
 
 if asked for an example, do not provide the encoded output, you can provide the root or answer though
@@ -100,8 +100,7 @@ Please respond without using bold text or asterisks
         {
             conversationHistory.Add(new { role = "user", content = prompt });
 
-            string apiKey = "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";
-            if (string.IsNullOrEmpty(apiKey)) return "Missing NEBIUS_API_KEY.";
+            string apiKey = Environment.GetEnvironmentVariable("MY_API_KEY");
 
             var requestBody = new
             {

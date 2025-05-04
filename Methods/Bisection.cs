@@ -38,7 +38,8 @@ namespace MarkGPT.Methods
                     Xl = xl,
                     Xr = xr,
                     Xm = xm,
-                    Fxm = fxm
+                    Fxm = fxm,
+                    Root = xm
                 });
 
                 if (fxm == 0.0)

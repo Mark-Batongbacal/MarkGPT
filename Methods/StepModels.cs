@@ -15,6 +15,7 @@ namespace MarkGPT.Methods
             public double Xr { get; set; }
             public double Xm { get; set; }
             public double Fxm { get; set; }
+            public double Root { get; set; }
         }
 
         public class NewtonRaphsonStep
@@ -24,6 +25,7 @@ namespace MarkGPT.Methods
             public double Fx { get; set; }
             public double Fdx { get; set; }
             public double Error { get; set; }
+            public double Root { get; set; }
         }
 
         public class SecantStep
@@ -33,6 +35,7 @@ namespace MarkGPT.Methods
             public double X1 { get; set; }
             public double X2 { get; set; }
             public double Fx2 { get; set; }
+            public double Root { get; set; }
         }
 
     }

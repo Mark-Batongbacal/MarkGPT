@@ -70,37 +70,71 @@ namespace MarkGPT
 
         }
 
-        
-private async Task ShowBotMessageAsync(string message)
+
+        private async Task ShowBotMessageAsync(string message)
         {
             string botResponse;
 
-            botResponse = await LlamaTextAI.GetLlamaResponseAsync(message);
-            //botResponse = await DeepSeekTextAI.GetLlamaResponseAsync(message);
+            //botResponse = await LlamaTextAI.GetLlamaResponseAsync(message);
+            botResponse = await DeepSeekTextAI.GetLlamaResponseAsync(message);
 
             if (botResponse.Contains("120219"))
             {
+                int startIndex = botResponse.IndexOf("120219");
+                int endIndex = botResponse.IndexOf("*", startIndex);
+
                 string tempresp = botResponse;
-                string[] parts = botResponse.Split('|');
 
-                if (parts.Length >= 6)
+                if (startIndex != -1 && endIndex != -1)
                 {
-                    try
-                    {
-                        var (msg, display) = MethodDispatcher.Dispatch(parts, ChatStack);
-                        botResponse = msg;
-                        display?.Invoke();
-                        await getRoot(tempresp);
-                    }
-                    catch
-                    {
-                        Debug.WriteLine(botResponse);
-                        botResponse = "There was an error processing your input.";
 
+                    string result = botResponse.Substring(startIndex, endIndex - startIndex);
+
+                    string[] parts = result.Split('|');
+
+                    if (parts.Length >= 6)
+                    {
+                        try
+                        {
+                            var botTextBloc = new TextBlock
+                            {
+                                Text = botResponse,
+                                TextWrapping = TextWrapping.Wrap,
+                                HorizontalAlignment = HorizontalAlignment.Left,
+                                FontSize = 17,
+                                FontWeight = FontWeights.SemiBold,
+                                Foreground = new SolidColorBrush(Colors.White),
+                                FontFamily = new FontFamily("ms-appx:///Fonts/Inter-VariableFont_opsz,wght.ttf#Inter")
+                            };
+
+                            var botBorde = new Border
+                            {
+                                //Background = new SolidColorBrush(Color.FromArgb(255, 51, 51, 51)),
+                                CornerRadius = new CornerRadius(25),
+                                Padding = new Thickness(15),
+                                Margin = new Thickness(0, 0, 0, 6),
+                                Child = botTextBloc,
+                                HorizontalAlignment = HorizontalAlignment.Left,
+                                MaxWidth = 1000
+                            };
+
+                            ChatStack.Children.Add(botBorde);
+                            ScrollToBottom();
+                            var (msg, display) = MethodDispatcher.Dispatch(parts, ChatStack);
+                            botResponse = msg;
+
+                            display?.Invoke();
+                            await getRoot(tempresp);
+                        }
+                        catch
+                        {
+                            Debug.WriteLine(botResponse);
+                            botResponse = "There was an error processing your input.";
+
+                        }
                     }
                 }
             }
-
             var botTextBlock = new TextBlock
             {
                 Text = botResponse,
