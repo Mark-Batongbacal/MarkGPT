@@ -13,12 +13,13 @@ using System.Collections.ObjectModel;
 using Microsoft.UI.Xaml.Data;
 using MarkGPT.AI;
 using Windows.UI.Text;
+using System.Diagnostics;
 namespace MarkGPT.Helpers
 {
     public static class DisplayHelper
     {
 
-        public static async void DisplayBisection(MainPage page, StackPanel stack, List<BisectionStep> steps)
+        public static async void DisplayBisection(MainPage page, StackPanel stack, List<BisectionStep> steps, string methodname)
         {
             var rows = steps.Select(s => new List<string>
     {
@@ -52,7 +53,7 @@ namespace MarkGPT.Helpers
 
 
 
-        public static async void DisplayNewton(MainPage page, StackPanel stack, List<NewtonRaphsonStep> steps)
+        public static async void DisplayNewton(MainPage page, StackPanel stack, List<NewtonRaphsonStep> steps, string methodname)
         {
             var rows = steps.Select(s => new List<string>
     {
@@ -87,7 +88,7 @@ namespace MarkGPT.Helpers
 
         }
 
-        public static async void DisplaySecant(MainPage page, StackPanel stack, List<SecantStep> steps)
+        public static async void DisplaySecant(MainPage page, StackPanel stack, List<SecantStep> steps, string methodname)
         {
             var rows = steps.Select(s => new List<string>
     {
@@ -119,6 +120,53 @@ namespace MarkGPT.Helpers
             page.ScrollToBottom();
         }
 
+        public static async void DisplayGaussian(MainPage page, StackPanel stack, List<GaussianStep> steps, string methodname)
+        {
+            var headers = new List<string> { "Step", "Operation", "Matrix", "Roots" };
+            var rows = new List<List<string>>();
+
+            foreach (var step in steps)
+            {
+                rows.Add(new List<string>
+        {
+            step.Step.ToString(),
+            step.Operation,
+            step.MatrixState,
+            step.Roots != null
+            ? string.Join(", ", step.Roots.Select(r => r.ToString("F4")))
+            : ""
+        });
+            }
+
+            ShowTable(stack, headers, rows);
+
+            // Get last matrix state and roots
+            string lastMatrix = steps.Last().MatrixState;
+            string roots = string.Join(", ", steps.Last().Roots.Select(r => r.ToString("F4")));
+            Debug.Write(methodname);
+            string summaryPrompt = $@"
+        After performing {methodname}, we arrived at the following reduced matrix:
+        {lastMatrix}
+        The roots found are: {roots}.
+        Describe what these roots represent and how they are derived from the matrix.
+        Mention only Gaussian Elimination, no other method.
+        Don't use bold text. Just explain the result naturally.";
+
+            var resultText = new TextBlock
+            {
+                Text = await DeepSeekTextAI.GetLlamaResponseAsync(summaryPrompt),
+                TextWrapping = TextWrapping.Wrap,
+                Margin = new Thickness(10, 10, 0, 0),
+                HorizontalAlignment = HorizontalAlignment.Left,
+                FontSize = 17,
+                FontWeight = FontWeights.Bold,
+                Foreground = new SolidColorBrush(Colors.White),
+                FontFamily = new FontFamily("ms-appx:///Fonts/Inter-VariableFont_opsz,wght.ttf#Inter")
+            };
+
+            stack.Children.Add(resultText);
+            page.ScrollToBottom();
+        }
 
 
         public static void ShowTable(StackPanel chatStack, List<string> headers, List<List<string>> rows)

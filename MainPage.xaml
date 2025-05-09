@@ -7,6 +7,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
+    Loaded="Page_Loaded"
     RequestedTheme="Light">
 
     <Grid Background="#212121">
@@ -34,25 +35,25 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <TextBox x:Name="InputBox"
-     Background="#303030"
-     Grid.Column="1"
-     PlaceholderText="Type your message..."
-     MinHeight="40"
-     Width="400"
-     TextWrapping="Wrap"
-     Foreground="White"
-     AcceptsReturn="True"
-     VerticalAlignment="Center"
-     Margin="0,0,8,0">
-            </TextBox>
+            <TextBox x:Name="InputBox" PreviewKeyDown="InputBox_KeyDown"
+             Background="#303030"
+             Grid.Column="1"
+             PlaceholderText="Type your message..."
+             MinHeight="40"
+             Width="400"
+             TextWrapping="Wrap"
+             Foreground="White"
+             AcceptsReturn="True"
+             VerticalAlignment="Center"
+             Margin="0,0,8,0">
+                    </TextBox>
 
-            <Button Grid.Column="2" 
-    Background="#303030"
-    Foreground="Gray"
-    Content="Send" 
-    VerticalAlignment="Center"
-    Click="Send_Click"/>
+                <Button Grid.Column="2" 
+            Background="#303030"
+            Foreground="Gray"
+            Content="Send" 
+            VerticalAlignment="Center"
+            Click="Send_Click"/>        
         </Grid>
     </Grid>
 </Page>

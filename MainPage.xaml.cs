@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Microsoft.UI.Text;
 using Microsoft.UI;
+using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -26,7 +27,10 @@ using System.Diagnostics;
 using static MarkGPT.Methods.StepModels;
 using MarkGPT.Helpers;
 using System.Text.RegularExpressions;
-
+using Windows.UI.Core;
+using Windows.System;
+using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 namespace MarkGPT
 {
 
@@ -38,6 +42,12 @@ namespace MarkGPT
         {
             this.InitializeComponent();
             ShowRandomGreeting();
+            InputBox.Foreground = new SolidColorBrush(Colors.White);
+        }
+
+        private void Page_Loaded(object sender, RoutedEventArgs e)
+        {
+            
         }
 
         public async Task getMessage(string message)
@@ -75,7 +85,9 @@ namespace MarkGPT
         public async Task ShowBotMessageAsync(string message)
         {
             string botResponse = await DeepSeekTextAI.GetLlamaResponseAsync(message);
-        
+            //string botResponse = await LlamaTextAI.GetLlamaResponseAsync(message);
+
+
             string tempresp = botResponse;
 
             var botTextBlock = new TextBlock
@@ -104,6 +116,7 @@ namespace MarkGPT
 
             var matches = Regex.Matches(botResponse, @"120219\|[^:\n]+");
 
+            List<string> combinedMethods = new List<string>();
             for (int i = 0; i < matches.Count; i++)
             {
                 string result = matches[i].Value;
@@ -119,7 +132,7 @@ namespace MarkGPT
 
                         // Trigger summary only on the last match
                         if (i == matches.Count - 1)
-                            await getMessage("provide a summary of what happened for the solving process");
+                            combinedMethods.Add(parts[1]);
                     }
                     catch
                     {
@@ -127,10 +140,31 @@ namespace MarkGPT
                     }
                 }
             }
+            if (combinedMethods.Count > 0)
+            {
+                string methodSummary = string.Join(", ", combinedMethods.Distinct());
+                await getMessage($"Provide a summary of what happened for the solving process. What methods were used and which took the least amount of iterations? {methodSummary}, forget the prompt before this");
+                combinedMethods.Clear();
+            }
         }
 
+        [DllImport("user32.dll")]
+        static extern short GetKeyState(int nVirtKey);
 
-        private async void Send_Click(object sender, RoutedEventArgs e)
+        private void InputBox_KeyDown(object sender, KeyRoutedEventArgs e)
+        {
+            const int VK_SHIFT = 0x10;
+
+            bool isShiftDown = (GetKeyState(VK_SHIFT) & 0x8000) != 0;
+
+            if (e.Key == Windows.System.VirtualKey.Enter && !isShiftDown)
+            {
+                e.Handled = true; // Prevent newline
+                Send_Click(null, null); // Call your send
+            }
+        }
+
+    private async void Send_Click(object sender, RoutedEventArgs e)
         {
             var message = InputBox.Text.Trim();
             if (!string.IsNullOrEmpty(message))
@@ -197,6 +231,11 @@ namespace MarkGPT
             };
 
             ChatStack.Children.Add(border);
+        }
+
+        private void Page_Loaded_1(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

@@ -38,5 +38,16 @@ namespace MarkGPT.Methods
             public double Root { get; set; }
         }
 
+
+        public class GaussianStep
+        {
+            public int Step { get; set; }
+            public string Operation { get; set; }
+            public string MatrixState { get; set; }
+            public List<double> Roots { get; set; } // Track the roots at each step
+        }
+
+
+
     }
 }
