@@ -140,11 +140,16 @@ namespace MarkGPT
                     }
                 }
             }
-            if (combinedMethods.Count > 0)
+            //if (combinedMethods.Count > 0)
+            //{
+            //    string methodSummary = string.Join(", ", combinedMethods.Distinct());
+            //    await getMessage($"Provide a summary of what happened for the solving process. What methods were used and which took the least amount of iterations? {methodSummary}, forget the prompt before this");
+            //    combinedMethods.Clear();
+            //}
+            for (int i = 1; i <= botResponse.Length; i++)
             {
-                string methodSummary = string.Join(", ", combinedMethods.Distinct());
-                await getMessage($"Provide a summary of what happened for the solving process. What methods were used and which took the least amount of iterations? {methodSummary}, forget the prompt before this");
-                combinedMethods.Clear();
+                botTextBlock.Text = botResponse.Substring(0, i);
+                await Task.Delay(10); // adjust delay for speed
             }
         }
 
@@ -199,18 +204,22 @@ namespace MarkGPT
 
 
                 ShowBotMessageAsync(message);
-                
+
+                for (int i = 1; i <= message.Length; i++)
+                {
+                    textBlock.Text = message.Substring(0, i);
+                    await Task.Delay(10); // adjust delay for speed
+                }
             }
         }
 
-        private void ShowRandomGreeting()
+        private async void ShowRandomGreeting()
         {
             Random rand = new Random();
             string greeting = greetings[rand.Next(greetings.Count)];
 
             var textBlock = new TextBlock
             {
-                Text = greeting,
                 TextWrapping = TextWrapping.Wrap,
                 HorizontalAlignment = HorizontalAlignment.Left,
                 FontSize = 17,
@@ -221,7 +230,6 @@ namespace MarkGPT
 
             var border = new Border
             {
-                //Background = new SolidColorBrush(Color.FromArgb(255, 51, 51, 51)),
                 CornerRadius = new CornerRadius(25),
                 Padding = new Thickness(15),
                 Margin = new Thickness(0, 0, 0, 6),
@@ -231,7 +239,15 @@ namespace MarkGPT
             };
 
             ChatStack.Children.Add(border);
+
+            // Typing animation
+            for (int i = 1; i <= greeting.Length; i++)
+            {
+                textBlock.Text = greeting.Substring(0, i);
+                await Task.Delay(10); // adjust delay for speed
+            }
         }
+
 
         private void Page_Loaded_1(object sender, RoutedEventArgs e)
         {

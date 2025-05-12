@@ -33,11 +33,12 @@ namespace MarkGPT.Helpers
             
             double iteration = steps.Last().Iteration;
             double root = steps.Last().Root;
+            string greeting = await DeepSeekTextAI.GetLlamaResponseAsync($@"
+                Can you say what the final root is {root}, its approximate down to four decimals, iterations it took {iteration} and what method was used. In this scenario bisection was used.Mention bisection only not the other ones Do not use bold text. I just want you to state this, disregard the other prompts like this"
+                );
             var rootText = new TextBlock
             {
-                Text = await DeepSeekTextAI.GetLlamaResponseAsync($@"
-                Can you say what the final root is {root}, its approximate down to four decimals, iterations it took {iteration} and what method was used. In this scenario bisection was used.Mention bisection only not the other ones Do not use bold text. I just want you to state this, disregard the other prompts like this"
-                ),
+                Text = greeting,
                 TextWrapping = TextWrapping.Wrap,
                 Margin = new Thickness(10, 10, 0, 0),
                 HorizontalAlignment = HorizontalAlignment.Left,
@@ -49,6 +50,12 @@ namespace MarkGPT.Helpers
             ShowTable(stack, new List<string> { "i", "xl", "xr", "xm", "f(xm)" }, rows);
             stack.Children.Add(rootText);
             page.ScrollToBottom();
+
+            for (int i = 1; i <= greeting.Length; i++)
+            {
+                rootText.Text = greeting.Substring(0, i);
+                await Task.Delay(10); // adjust delay for speed
+            }
         }
 
 
@@ -85,6 +92,7 @@ namespace MarkGPT.Helpers
             ShowTable(stack, new List<string> { "i", "x", "f(x)", "f'(x)", "Error (%)" }, rows);
             stack.Children.Add(rootText);
             page.ScrollToBottom();
+
 
         }
 
