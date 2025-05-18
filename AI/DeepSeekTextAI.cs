@@ -36,6 +36,7 @@ namespace MarkGPT.AI
                 Gaussian Elimination 2GE
                 Gauss Jordan Elimination 2GJ    
                 Gauss Seidel 2GS
+                Linear Regression 3LR                
 
                 For the Bisection Method:
 
@@ -88,7 +89,9 @@ namespace MarkGPT.AI
 
                 Accepted functions: pow(x,n), sqrt(x), cbrt(x), exp(x), sin(x), cos(x), tan(x) and similar.  
                 Do not use ** for exponentiation.
-
+                
+                Do not show how the output is formatted
+                Do not show the steps of the method. Just output the result in the specified format.
                 Examples:
 
                 input: Bisection method, x^2 - 5, 0 5  
@@ -108,6 +111,9 @@ namespace MarkGPT.AI
 
                 input: Gauss Seidel, 3 equations, 3x+2y+z=10, y+2z=8, x+3z=9  
                 output: 120219|2GS|3|4,1,2,4|3,5,1,7|1,1,3,3|1,-1,0.5:
+
+                input: Linear Regression method, points (1,2), (2,3), (3,4)
+                output: 120219|3LR|1;2,2;3,3;4:
                 "
             }
         };

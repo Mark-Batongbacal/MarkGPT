@@ -84,8 +84,8 @@ namespace MarkGPT
 
         public async Task ShowBotMessageAsync(string message)
         {
-            string botResponse = await DeepSeekTextAI.GetLlamaResponseAsync(message);
-            //string botResponse = await LlamaTextAI.GetLlamaResponseAsync(message);
+            //string botResponse = await DeepSeekTextAI.GetLlamaResponseAsync(message);
+            string botResponse = await LlamaTextAI.GetLlamaResponseAsync(message);
 
 
             string tempresp = botResponse;
@@ -115,6 +115,12 @@ namespace MarkGPT
             ScrollToBottom();
 
             var matches = Regex.Matches(botResponse, @"120219\|[^:\n]+");
+            
+
+            foreach (Match match in matches)
+            {
+                Debug.WriteLine(match.Value);
+            }
 
             List<string> combinedMethods = new List<string>();
             for (int i = 0; i < matches.Count; i++)
@@ -122,15 +128,14 @@ namespace MarkGPT
                 string result = matches[i].Value;
                 string[] parts = result.Split('|');
 
-                if (parts.Length >= 6)
+                if (parts.Length >= 3)
                 {
                     try
                     {
                         var (msg, display) = MethodDispatcher.Dispatch(this, parts, ChatStack);
-
+                        ScrollToBottom();
                         display?.Invoke();
 
-                        // Trigger summary only on the last match
                         if (i == matches.Count - 1)
                             combinedMethods.Add(parts[1]);
                     }
@@ -140,12 +145,7 @@ namespace MarkGPT
                     }
                 }
             }
-            //if (combinedMethods.Count > 0)
-            //{
-            //    string methodSummary = string.Join(", ", combinedMethods.Distinct());
-            //    await getMessage($"Provide a summary of what happened for the solving process. What methods were used and which took the least amount of iterations? {methodSummary}, forget the prompt before this");
-            //    combinedMethods.Clear();
-            //}
+            
             for (int i = 1; i <= botResponse.Length; i++)
             {
                 botTextBlock.Text = botResponse.Substring(0, i);

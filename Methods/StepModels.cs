@@ -47,7 +47,24 @@ namespace MarkGPT.Methods
             public List<double> Roots { get; set; } // Track the roots at each step
         }
 
+        public class LinearRegressionStep
+        {
+            public int Iteration { get; set; } // Not used in current method, but kept for consistency
+            public List<double> XValues { get; set; }
+            public List<double> YValues { get; set; }
+            public List<double> XYValues { get; set; }
+            public List<double> XSquaredValues { get; set; }
 
+            public double SumX { get; set; }
+            public double SumY { get; set; }
+            public double SumXY { get; set; }
+            public double SumX2 { get; set; }
+            public int N { get; set; }
 
+            public double Slope { get; set; }
+            public double Intercept { get; set; }
+
+            public string Equation { get; set; }
+        }
     }
 }

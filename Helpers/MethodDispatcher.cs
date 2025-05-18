@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,8 +12,30 @@ namespace MarkGPT.Helpers
 {
     public static class MethodDispatcher
     {
+        public static List<(double x, double y)> ParsePoints(string input)
+        {
+            var pairs = input.Split(',');
+            var points = new List<(double x, double y)>();
+
+            foreach (var pair in pairs)
+            {
+                var parts = pair.Split(';');
+                if (parts.Length != 2) continue;
+
+                if (double.TryParse(parts[0], NumberStyles.Any, CultureInfo.InvariantCulture, out double x) &&
+                    double.TryParse(parts[1], NumberStyles.Any, CultureInfo.InvariantCulture, out double y))
+                {
+                    points.Add((x, y));
+                }
+            }
+
+            Debug.Write(points);
+            return points;
+        }
+
         public static (string botMessage, Action displayAction) Dispatch(MainPage page, string[] parts, StackPanel chatStack)
         {
+
             string methodCode = parts[1];
             string methodName = ""; // Declare methodName to be passed
 
@@ -117,10 +141,24 @@ namespace MarkGPT.Helpers
                     return ("", () =>
                         DisplayHelper.DisplayGaussian(page, chatStack, gsSteps, methodName));
 
+                case "3LR":  // LINEAR REGRESSION METHOD
+                    Debug.Write("The method is linear regression");
+                    methodName = "Linear Regression";
+                    string pointsInput = parts[2];  // Example: "1,2;2,3;3,5"
+
+                    // Parse the points from the string (assuming they are comma-separated)
+                    var points = ParsePoints(pointsInput);
+
+                    // Call the Linear Regression method to get the result
+                    var lrResult = LinearRegression.Solve(points);
+
+                    // Return the formatted response for the display
+                    return ("", () =>
+                        DisplayHelper.DisplayLinearRegression(page, chatStack, lrResult, methodName));
+
                 default:
                     return ("Unrecognized method code. Please check your input format.", null);
             }
         }
-
     }
 }
