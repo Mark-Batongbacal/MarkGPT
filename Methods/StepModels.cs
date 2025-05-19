@@ -65,6 +65,8 @@ namespace MarkGPT.Methods
             public double Intercept { get; set; }
 
             public string Equation { get; set; }
+
+            public List<double> PolynomialCoefficients { get; set; }
         }
     }
 }

@@ -12,6 +12,16 @@ namespace MarkGPT.Helpers
 {
     public static class MethodDispatcher
     {
+        static double EvaluateFunction(string fx, double x)
+        {
+            var parser = new Mathos.Parser.MathParser();
+
+            parser.LocalVariables["x"] = x;
+
+            double result = parser.Parse(fx);
+
+            return result;
+        }
         public static List<(double x, double y)> ParsePoints(string input)
         {
             var pairs = input.Split(',');
@@ -41,35 +51,48 @@ namespace MarkGPT.Helpers
 
             switch (methodCode)
             {
-                case "1B":  //BISECTION METHOD
+                case "1B":  // BISECTION METHOD
                     methodName = "Bisection";
                     double xl = Convert.ToDouble(parts[2]);
                     double xr = Convert.ToDouble(parts[3]);
                     string fx = parts[4];
                     double error = Convert.ToDouble(parts[5]);
+
+                    // Create the delegate that uses your Mathos parser
+                    Func<double, double> function = x => EvaluateFunction(fx, x);
+
                     var bisResult = Bisection.Solve(xl, xr, error, fx);
                     return ("", () =>
-                        DisplayHelper.DisplayBisection(page, chatStack, bisResult, methodName));
+                        DisplayHelper.DisplayBisection(page, chatStack, bisResult, methodName, function));
 
-                case "1NR":  //NEWTON RAPHSON METHOD
+                case "1NR":  // NEWTON RAPHSON METHOD
                     methodName = "Newton-Raphson";
                     double x0 = Convert.ToDouble(parts[2]);
                     string fx_nr = parts[3];
                     string dfx_nr = parts[4];
                     double error_nr = Convert.ToDouble(parts[5]);
+
+                    // Create the delegate for the function using Mathos parser
+                    Func<double, double> function_nr = x => EvaluateFunction(fx_nr, x);
+
                     var nrResult = NewtonRaphson.Solve(x0, error_nr, fx_nr, dfx_nr);
                     return ("", () =>
-                        DisplayHelper.DisplayNewton(page, chatStack, nrResult, methodName));
+                        DisplayHelper.DisplayNewton(page, chatStack, nrResult, methodName, function_nr));
 
-                case "1S":  //SECANT METHOD
+                case "1S":  // SECANT METHOD
                     methodName = "Secant";
                     double x0_s = Convert.ToDouble(parts[2]);
                     double x1_s = Convert.ToDouble(parts[3]);
                     string fx_s = parts[4];
                     double error_s = Convert.ToDouble(parts[5]);
+
+                    // Create the delegate for the function using Mathos parser
+                    Func<double, double> function_s = x => EvaluateFunction(fx_s, x);
+
                     var secResult = Secant.Solve(x0_s, x1_s, error_s, fx_s);
                     return ("", () =>
-                        DisplayHelper.DisplaySecant(page, chatStack, secResult, methodName));
+                        DisplayHelper.DisplaySecant(page, chatStack, secResult, methodName, function_s));
+
 
                 case "2GE":  //GAUSSIAN ELIMINATION METHOD
                     methodName = "Gaussian Elimination";
@@ -158,6 +181,21 @@ namespace MarkGPT.Helpers
 
                 default:
                     return ("Unrecognized method code. Please check your input format.", null);
+
+                case "3PR":  // POLYNOMIAL REGRESSION METHOD
+                    Debug.Write("The method is polynomial regression");
+                    methodName = "Polynomial Regression";
+
+                    string polyPointsInput = parts[2];   // Example: "1,2;2,3;3,7"
+                    int degree = int.Parse(parts[3]);    // Degree of polynomial
+
+                    var polyPoints = ParsePoints(polyPointsInput);
+
+                    // Solve polynomial regression
+                    var polyResult = PolynomialRegression.Solve(polyPoints, degree);
+
+                    return ("", () =>
+                        DisplayHelper.DisplayPolynomialRegression(page, chatStack, polyResult, methodName));
             }
         }
     }

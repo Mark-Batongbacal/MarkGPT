@@ -36,7 +36,8 @@ namespace MarkGPT.AI
                 Gaussian Elimination 2GE
                 Gauss Jordan Elimination 2GJ    
                 Gauss Seidel 2GS
-                Linear Regression 3LR                
+                Linear Regression 3LR   
+                Polynomial Regression 3PR   
 
                 For the Bisection Method:
 
@@ -114,6 +115,9 @@ namespace MarkGPT.AI
 
                 input: Linear Regression method, points (1,2), (2,3), (3,4)
                 output: 120219|3LR|1;2,2;3,3;4:
+
+                input: Polynomial Regression method, points (1,2), (2,3), (3,4), degree 2
+                output: 120219|3PR|1;2,2;3,3;4|2:
                 "
             }
         };

@@ -70,7 +70,7 @@ namespace MarkGPT.Methods
                 Iteration = 3,
                 Slope = m,
                 Intercept = b,
-                Equation = $"Fitted Line: y = {m.ToString("0.###", CultureInfo.InvariantCulture)}x + {b.ToString("0.###", CultureInfo.InvariantCulture)}"
+                Equation = $"Fitted Line: y = {m.ToString("0.###", CultureInfo.InvariantCulture)}*x + {b.ToString("0.###", CultureInfo.InvariantCulture)}"
             };
             steps.Add(step3);
 

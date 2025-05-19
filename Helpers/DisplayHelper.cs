@@ -1,41 +1,76 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.UI.Text;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml;
-using Microsoft.UI;
-using static MarkGPT.Methods.StepModels;
 using System.Collections.ObjectModel;
-using Microsoft.UI.Xaml.Data;
-using MarkGPT.AI;
-using Windows.UI.Text;
 using System.Diagnostics;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+
+using Microsoft.UI;
+using Microsoft.UI.Text;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Data;
+using Microsoft.UI.Xaml.Media;
+
+using LiveChartsCore;
+using LiveChartsCore.SkiaSharpView;
+using LiveChartsCore.SkiaSharpView.WinUI;
+using LiveChartsCore.Kernel.Sketches;
+using LiveChartsCore.Defaults;
+using LiveChartsCore.SkiaSharpView.Drawing;
+
+using SkiaSharp;
+
+using static MarkGPT.Methods.StepModels;
+using MarkGPT.AI;
+using LiveChartsCore.SkiaSharpView.Painting;
+using ScottPlot.Statistics;
+
+
 namespace MarkGPT.Helpers
 {
     public static class DisplayHelper
     {
 
-        public static async void DisplayBisection(MainPage page, StackPanel stack, List<BisectionStep> steps, string methodname)
+        public static async void DisplayBisection(MainPage page, StackPanel stack, List<BisectionStep> steps, string methodname, Func<double, double> function)
         {
+            // First display the regular table
             var rows = steps.Select(s => new List<string>
+    {
+        s.Iteration.ToString(),
+        s.Xl.ToString("F4"),
+        s.Xr.ToString("F4"),
+        s.Xm.ToString("F4"),
+        s.Fxm.ToString("F4")
+    }).ToList();
+
+            ShowTable(page, stack, new List<string> { "i", "xl", "xr", "xm", "f(xm)" }, rows);
+
+            // Plot the function curve
+            double minX = steps.Min(s => Math.Min(s.Xl, s.Xr));
+            double maxX = steps.Max(s => Math.Max(s.Xl, s.Xr));
+            int numPoints = 100;
+            var funcX = new List<double>();
+            var funcY = new List<double>();
+            double step = (maxX - minX) / (numPoints - 1);
+            for (int i = 0; i < numPoints; i++)
             {
-                s.Iteration.ToString(),
-                s.Xl.ToString("F4"),
-                s.Xr.ToString("F4"),
-                s.Xm.ToString("F4"),
-                s.Fxm.ToString("F4")
-            }).ToList();
+                double x = minX + i * step;
+                funcX.Add(x);
+                funcY.Add(function(x));
+            }
+            var functionChart = ChartHelper.CreateFunctionChart(function, minX, maxX, numPoints, "Function Plot");
+            ChartHelper.AddChartToDisplay(page, stack, functionChart);
 
+            
 
+            // Show the final result text
             double iteration = steps.Last().Iteration;
             double root = steps.Last().Root;
             string greeting = await LlamaTextAI.GetLlamaResponseAsync($@"
-                Can you say what the final root is {root}, its approximate down to four decimals, iterations it took {iteration} and what method was used. In this scenario bisection was used.Mention bisection only not the other ones Do not use bold text. I just want you to state this, disregard the other prompts like this"
-                );
+        Can you say what the final root is {root}, its approximate down to four decimals, iterations it took {iteration} and what method was used. In this scenario bisection was used. Mention bisection only not the other ones Do not use bold text. I just want you to state this, disregard the other prompts like this"
+            );
 
             var rootText = new TextBlock
             {
@@ -49,24 +84,24 @@ namespace MarkGPT.Helpers
                 FontFamily = new FontFamily("ms-appx:///Fonts/Inter-VariableFont_opsz,wght.ttf#Inter")
             };
 
-            ShowTable(page, stack, new List<string> { "i", "xl", "xr", "xm", "f(xm)" }, rows);
             int rowDelay = 1500;
             int totalRows = rows.Count;
             int totalDelay = rowDelay * totalRows;
-            await Task.Delay(totalDelay); 
+            await Task.Delay(totalDelay);
             stack.Children.Add(rootText);
             page.ScrollToBottom();
 
             for (int i = 1; i <= greeting.Length; i++)
             {
                 rootText.Text = greeting.Substring(0, i);
-                await Task.Delay(10); // adjust delay for speed
+                await Task.Delay(10);
             }
         }
 
 
 
-        public static async void DisplayNewton(MainPage page, StackPanel stack, List<NewtonRaphsonStep> steps, string methodname)
+
+        public static async void DisplayNewton(MainPage page, StackPanel stack, List<NewtonRaphsonStep> steps, string methodname, Func<double, double> function)
         {
             var rows = steps.Select(s => new List<string>
             {
@@ -76,6 +111,24 @@ namespace MarkGPT.Helpers
                 s.Fdx.ToString("F4"),
                 s.Error.ToString("F4")
             }).ToList();
+
+            ShowTable(page, stack, new List<string> { "i", "x", "f(x)", "f'(x)", "Error (%)" }, rows);
+
+            // Plot the function curve
+            double minX = steps.Min(s => s.X);
+            double maxX = steps.Max(s => s.X);
+            int numPoints = 100;
+            var funcX = new List<double>();
+            var funcY = new List<double>();
+            double step = (maxX - minX) / (numPoints - 1);
+            for (int i = 0; i < numPoints; i++)
+            {
+                double x = minX + i * step;
+                funcX.Add(x);
+                funcY.Add(function(x));
+            }
+            var functionChart = ChartHelper.CreateFunctionChart(function, minX, maxX, numPoints, "Function Plot");
+            ChartHelper.AddChartToDisplay(page, stack, functionChart);
 
             double root = steps.Last().Root;
             double iteration = steps.Last().Iteration;
@@ -94,7 +147,6 @@ namespace MarkGPT.Helpers
                 FontFamily = new FontFamily("ms-appx:///Fonts/Inter-VariableFont_opsz,wght.ttf#Inter")
             };
 
-            ShowTable(page, stack, new List<string> { "i", "x", "f(x)", "f'(x)", "Error (%)" }, rows);
             int rowDelay = 1500;
             int totalRows = rows.Count;
             int totalDelay = rowDelay * totalRows;
@@ -109,16 +161,34 @@ namespace MarkGPT.Helpers
             }
         }
 
-        public static async void DisplaySecant(MainPage page, StackPanel stack, List<SecantStep> steps, string methodname)
+        public static async void DisplaySecant(MainPage page, StackPanel stack, List<SecantStep> steps, string methodname, Func<double, double> function)
         {
             var rows = steps.Select(s => new List<string>
-        {
-            s.Iteration.ToString(),
-            s.X0.ToString("F4"),
-            s.X1.ToString("F4"),
-            s.X2.ToString("F4"),
-            s.Fx2.ToString("F4")
-        }).ToList();
+            {
+                s.Iteration.ToString(),
+                s.X0.ToString("F4"),
+                s.X1.ToString("F4"),
+                s.X2.ToString("F4"),
+                s.Fx2.ToString("F4")
+            }).ToList();
+
+            ShowTable(page, stack, new List<string> { "i", "x0", "x1", "x2", "f(x2)" }, rows);
+
+            // Plot the function curve
+            double minX = steps.Min(s => Math.Min(s.X0, Math.Min(s.X1, s.X2)));
+            double maxX = steps.Max(s => Math.Max(s.X0, Math.Max(s.X1, s.X2)));
+            int numPoints = 100;
+            var funcX = new List<double>();
+            var funcY = new List<double>();
+            double step = (maxX - minX) / (numPoints - 1);
+            for (int i = 0; i < numPoints; i++)
+            {
+                double x = minX + i * step;
+                funcX.Add(x);
+                funcY.Add(function(x));
+            }
+            var functionChart = ChartHelper.CreateFunctionChart(function, minX, maxX, numPoints, "Function Plot");
+            ChartHelper.AddChartToDisplay(page, stack, functionChart);
 
             double root = steps.Last().Root;
             double iteration = steps.Last().Iteration;
@@ -137,7 +207,6 @@ namespace MarkGPT.Helpers
                 FontFamily = new FontFamily("ms-appx:///Fonts/Inter-VariableFont_opsz,wght.ttf#Inter")
             };
 
-            ShowTable(page, stack, new List<string> { "i", "x0", "x1", "x2", "f(x2)" }, rows);
             int rowDelay = 1500;
             int totalRows = rows.Count;
             int totalDelay = rowDelay * totalRows;
@@ -212,36 +281,35 @@ namespace MarkGPT.Helpers
             var final = steps.First();
 
             // Show Raw Data Table first
-            // 1. Raw Data Table
             var rawHeaders = new List<string> { "x", "y", "x*y", "x²" };
             var rawRows = new List<List<string>>();
 
             for (int i = 0; i < final.XValues.Count; i++)
             {
                 rawRows.Add(new List<string>
-                {
-                    final.XValues[i].ToString("F4"),
-                    final.YValues[i].ToString("F4"),
-                    final.XYValues[i].ToString("F4"),
-                    final.XSquaredValues[i].ToString("F4")
-                });
+            {
+                final.XValues[i].ToString("F4"),
+                final.YValues[i].ToString("F4"),
+                final.XYValues[i].ToString("F4"),
+                final.XSquaredValues[i].ToString("F4")
+            });
             }
             ShowTable(page, stack, rawHeaders, rawRows);
 
-            // 2. Total Row
+            // Total Row
             var totalRow = new List<List<string>>
-            {
-                new List<string>
-                {
-                    final.SumX.ToString("F4"),
-                    final.SumY.ToString("F4"),
-                    final.SumXY.ToString("F4"),
-                    final.SumX2.ToString("F4")
-                }
-            };
-            ShowTable(page ,stack, rawHeaders, totalRow);
+{
+    new List<string>
+    {
+        final.SumX.ToString("F4"),
+        final.SumY.ToString("F4"),
+        final.SumXY.ToString("F4"),
+        final.SumX2.ToString("F4")
+    }
+};
+            ShowTable(page, stack, rawHeaders, totalRow);
 
-            // 3. Equation Text
+            // Equation Text
             var functionText = new TextBlock
             {
                 Text = $"Function: {steps.Last().Equation}",
@@ -254,15 +322,38 @@ namespace MarkGPT.Helpers
             };
             
 
+            var xData = new ObservableCollection<double>(final.XValues);
+            var yData = new ObservableCollection<double>(final.YValues);
 
-            // Explanation
+
+            // Parse y = mx + b
+            var equation = steps.Last().Equation;
+            var match = Regex.Match(equation, @"y\s*=\s*([-\d.]+)\s*\*\s*x\s*([+-]\s*\d+\.?\d*)?");
+            if (!match.Success)
+            {
+                Debug.WriteLine("Equation format not recognized: " + equation);
+                // Optionally, show a message to the user or set a default value
+                return;
+            }
+
+            double m = double.Parse(match.Groups[1].Value);
+            double b = match.Groups[2].Success ? double.Parse(match.Groups[2].Value.Replace(" ", "")) : 0;
+
+            // Create and add the linear regression chart
+            var regressionChart = ChartHelper.CreateLinearRegressionChart(
+                xData, yData, m, b, steps.Last().Equation);
+            ChartHelper.AddChartToDisplay(page, stack, regressionChart);
+
+            Debug.Write("Dumaan dito");
+            stack.Children.Add(functionText);
+            // AI explanation prompt
             string summaryPrompt = $@"
-            The linear regression was calculated using these values:
-            Sum of x: {final.SumX}, Sum of y: {final.SumY}, Sum of x*y: {final.SumXY}, 
-            Sum of x^2: {final.SumX2}, Total points: {final.N}.
-            The resulting line is: {steps.Last().Equation}.
-            Explain what this line represents using the Linear Regression method only.
-            Do not use bold text. Keep it casual and easy to understand.";
+The linear regression was calculated using these values:
+Sum of x: {final.SumX}, Sum of y: {final.SumY}, Sum of x*y: {final.SumXY},    
+Sum of x^2: {final.SumX2}, Total points: {final.N}.
+The resulting line is: {steps.Last().Equation}.
+Explain what this line represents using the Linear Regression method only.
+Do not use bold text. Keep it casual and easy to understand.";
 
             string reply = await LlamaTextAI.GetLlamaResponseAsync(summaryPrompt);
 
@@ -277,7 +368,6 @@ namespace MarkGPT.Helpers
                 FontFamily = new FontFamily("ms-appx:///Fonts/Inter-VariableFont_opsz,wght.ttf#Inter")
             };
 
-            stack.Children.Add(functionText);
             int rowDelay = 1500;
             int totalRows = final.XValues.Count + 1;
             int totalDelay = rowDelay * totalRows;
@@ -291,6 +381,92 @@ namespace MarkGPT.Helpers
                 await Task.Delay(10);
             }
         }
+
+
+
+
+        public static async void DisplayPolynomialRegression(MainPage page, StackPanel stack, List<LinearRegressionStep> steps, string methodName)
+        {
+            var final = steps.First();
+
+            // Show Raw Data Table (only x and y for now)
+            var rawHeaders = new List<string> { "x", "y" };
+            var rawRows = new List<List<string>>();
+
+            for (int i = 0; i < final.XValues.Count; i++)
+            {
+                rawRows.Add(new List<string>
+        {
+            final.XValues[i].ToString("F4"),
+            final.YValues[i].ToString("F4")
+        });
+            }
+
+            ShowTable(page, stack, rawHeaders, rawRows);
+
+            // Equation Text
+            var functionText = new TextBlock
+            {
+                Text = $"Function: {steps.Last().Equation}",
+                TextWrapping = TextWrapping.Wrap,
+                Margin = new Thickness(10, 10, 0, 0),
+                FontSize = 18,
+                FontWeight = FontWeights.SemiBold,
+                Foreground = new SolidColorBrush(Colors.LightGreen),
+                FontFamily = new FontFamily("ms-appx:///Fonts/Inter-VariableFont_opsz,wght.ttf#Inter")
+            };
+
+            var xData = new ObservableCollection<double>(final.XValues);
+            var yData = new ObservableCollection<double>(final.YValues);
+
+            // Polynomial coefficients (assumed already in the Step)
+            var coefficients = final.PolynomialCoefficients;
+
+            // Chart for polynomial regression
+            var polyChart = ChartHelper.CreatePolynomialRegressionChart(
+                xData, yData, coefficients, steps.Last().Equation);
+            ChartHelper.AddChartToDisplay(page, stack, polyChart);
+
+            Debug.Write("Displayed polynomial regression chart");
+            stack.Children.Add(functionText);
+
+            // AI Explanation
+            string summaryPrompt = $@"
+            The polynomial regression was calculated using a degree-{coefficients.Count - 1} polynomial.
+            The resulting equation is: {steps.Last().Equation}.
+            Briefly explain what this polynomial means in the context of regression.
+            Don't use bold text. Just keep it clear and friendly.";
+
+            string reply = await LlamaTextAI.GetLlamaResponseAsync(summaryPrompt);
+
+            var summaryText = new TextBlock
+            {
+                TextWrapping = TextWrapping.Wrap,
+                Margin = new Thickness(10, 10, 0, 0),
+                HorizontalAlignment = HorizontalAlignment.Left,
+                FontSize = 17,
+                FontWeight = FontWeights.Bold,
+                Foreground = new SolidColorBrush(Colors.White),
+                FontFamily = new FontFamily("ms-appx:///Fonts/Inter-VariableFont_opsz,wght.ttf#Inter")
+            };
+
+            int rowDelay = 1500;
+            int totalRows = final.XValues.Count + 1;
+            int totalDelay = rowDelay * totalRows;
+            await Task.Delay(totalDelay);
+            stack.Children.Add(summaryText);
+            page.ScrollToBottom();
+
+            for (int i = 1; i <= reply.Length; i++)
+            {
+                summaryText.Text = reply.Substring(0, i);
+                await Task.Delay(10);
+            }
+        }
+
+
+
+
 
 
 
@@ -364,7 +540,6 @@ namespace MarkGPT.Helpers
                         await Task.Delay(10); 
                     }
                 }
-
                 await Task.Delay(150); 
                 
             }

@@ -30,7 +30,9 @@ using System.Text.RegularExpressions;
 using Windows.UI.Core;
 using Windows.System;
 using System.Runtime.InteropServices;
-using System.Runtime.InteropServices;
+using LiveChartsCore;
+
+
 namespace MarkGPT
 {
 
@@ -85,7 +87,7 @@ namespace MarkGPT
         public async Task ShowBotMessageAsync(string message)
         {
             //string botResponse = await DeepSeekTextAI.GetLlamaResponseAsync(message);
-            string botResponse = await LlamaTextAI.GetLlamaResponseAsync(message);
+            string botResponse = await DeepSeekTextAI.GetLlamaResponseAsync(message);
 
 
             string tempresp = botResponse;
