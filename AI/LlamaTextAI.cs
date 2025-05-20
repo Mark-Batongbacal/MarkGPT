@@ -120,6 +120,13 @@ namespace MarkGPT.AI
 
                 input: Polynomial Regression method, points (1,2), (2,3), (3,7), degree 2
                 output: 120219|3PR|1;2,2;3,3;7|2:
+
+                input: Trapezoidal method, f(x) = x² + 1, interval from 1 to 5, with 4 subintervals
+                output: 120219|4T|1|5|4|pow(x,2)+1:
+
+
+                input: Simpson's 1/3 method, f(x) = x³ - 2x + 1, interval from 0 to 4, with 6 subintervals
+                output: 120219|4S|0|4|6|pow(x,3)-2*x+1:
                 "
             }
         };

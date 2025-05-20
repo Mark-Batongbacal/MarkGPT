@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MarkGPT.Methods;
+using Mathos.Parser;
 using Microsoft.UI.Xaml.Controls;
 
 namespace MarkGPT.Helpers
@@ -22,6 +23,19 @@ namespace MarkGPT.Helpers
 
             return result;
         }
+
+        private static Func<double, double> ParseFunc(string expr)
+        {
+            var parser = new MathParser();
+
+            return x =>
+            {
+                parser.LocalVariables["x"] = x;
+                var result = parser.Parse(expr);
+                return Convert.ToDouble(result);
+            };
+        }
+
         public static List<(double x, double y)> ParsePoints(string input)
         {
             var pairs = input.Split(',');
@@ -179,9 +193,6 @@ namespace MarkGPT.Helpers
                     return ("", () =>
                         DisplayHelper.DisplayLinearRegression(page, chatStack, lrResult, methodName));
 
-                default:
-                    return ("Unrecognized method code. Please check your input format.", null);
-
                 case "3PR":  // POLYNOMIAL REGRESSION METHOD
                     Debug.Write("The method is polynomial regression");
                     methodName = "Polynomial Regression";
@@ -196,6 +207,45 @@ namespace MarkGPT.Helpers
 
                     return ("", () =>
                         DisplayHelper.DisplayPolynomialRegression(page, chatStack, polyResult, methodName));
+
+                case "4S":  // SIMPSON'S 1/3 RULE METHOD
+                    Debug.Write("The method is Simpson's 1/3 Rule");
+                    methodName = "Simpson's 1/3 Rule";
+
+                    double a = double.Parse(parts[2], CultureInfo.InvariantCulture);
+                    double b = double.Parse(parts[3], CultureInfo.InvariantCulture);
+                    int n = int.Parse(parts[4]);  
+                    string funcStr = parts[5];    
+
+                    // Parse function string to Func<double, double>
+                    Func<double, double> f = ParseFunc(funcStr);
+
+                    // Solve Simpson's 1/3 Rule integration
+                    var simpsonResult = Simpson.Solve(f, a, b, n);
+
+                    return ("", () =>
+                        DisplayHelper.DisplaySimpson(page, chatStack, simpsonResult, methodName));
+
+                case "4T":  // TRAPEZOIDAL RULE METHOD
+                    Debug.Write("The method is Trapezoidal Rule");
+                    methodName = "Trapezoidal Rule";
+
+                    double aT = double.Parse(parts[2], CultureInfo.InvariantCulture);
+                    double bT = double.Parse(parts[3], CultureInfo.InvariantCulture);
+                    int nT = int.Parse(parts[4]);
+                    string funcStrT = parts[5];
+
+                    Func<double, double> fT = ParseFunc(funcStrT);
+
+                    var trapezoidalResult = Trapezoidal.Solve(fT, aT, bT, nT);
+
+                    return ("", () =>
+                        DisplayHelper.DisplayTrapezoidal(page, chatStack, trapezoidalResult, methodName)); // reuse DisplaySimpson
+
+                default:
+                    return ("Unrecognized method code. Please check your input format.", null);
+
+                
             }
         }
     }

@@ -68,5 +68,18 @@ namespace MarkGPT.Methods
 
             public List<double> PolynomialCoefficients { get; set; }
         }
+
+        public class IntegrationStep
+        {
+            public int Iteration { get; set; }
+            public string Method { get; set; } // e.g. "Simpson's 1/3 Rule"
+            public double Result { get; set; } // Final integral value
+            public List<double> XValues { get; set; } // All x points
+            public List<double> YValues { get; set; } // f(x) values
+            public double IntervalA { get; set; } // Lower bound
+            public double IntervalB { get; set; } // Upper bound
+            public int SubIntervals { get; set; } // Number of intervals (n)
+            public string Formula { get; set; } // Optional string showing the Simpson's rule formula used
+        }
     }
 }

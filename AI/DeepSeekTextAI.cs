@@ -37,7 +37,9 @@ namespace MarkGPT.AI
                 Gauss Jordan Elimination 2GJ    
                 Gauss Seidel 2GS
                 Linear Regression 3LR   
-                Polynomial Regression 3PR   
+                Polynomial Regression 3PR
+                Simpson 1/3 Rule 4S
+                Trapezoidal Rule 4T 
 
                 For the Bisection Method:
 
@@ -116,8 +118,15 @@ namespace MarkGPT.AI
                 input: Linear Regression method, points (1,2), (2,3), (3,4)
                 output: 120219|3LR|1;2,2;3,3;4:
 
-                input: Polynomial Regression method, points (1,2), (2,3), (3,4), degree 2
-                output: 120219|3PR|1;2,2;3,3;4|2:
+                input: Polynomial Regression method, points (1,2), (2,3), (3,7), degree 2
+                output: 120219|3PR|1;2,2;3,3;7|2:
+
+                input: Trapezoidal method, f(x) = x² + 1, interval from 1 to 5, with 4 subintervals
+                output: 120219|4T|1|5|4|pow(x,2)+1:
+
+
+                input: Simpson's 1/3 method, f(x) = x³ - 2x + 1, interval from 0 to 4, with 6 subintervals
+                output: 120219|4S|0|4|6|pow(x,3)-2*x+1:
                 "
             }
         };

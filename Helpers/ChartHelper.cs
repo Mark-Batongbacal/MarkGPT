@@ -196,7 +196,7 @@ namespace MarkGPT.Helpers
                 DataPadding = new LvcPoint(0, 0),
                 GeometryStroke = null,
                 Stroke = new SolidColorPaint(SKColors.Gray) { StrokeThickness = 5 },
-                GeometryFill = null,
+                GeometryFill = new SolidColorPaint(SKColors.Gray),
                 Fill = null,
                 Values = polyPoints,
                 Name = equation
@@ -216,6 +216,80 @@ namespace MarkGPT.Helpers
 
             return chart;
         }
+
+        public static CartesianChart CreateSimpsonChart(Func<double, double> function, double a, double b, int n, string title = "Simpson's 1/3 Rule")
+        {
+            // Simpson's requires n to be even
+            if (n % 2 != 0) throw new ArgumentException("n must be even for Simpson's 1/3 rule.");
+
+            var xValues = new List<double>();
+            var yValues = new List<double>();
+
+            double step = (b - a) / n;
+
+            // Calculate all points at subinterval ends (a, a+step, ..., b)
+            for (int i = 0; i <= n; i++)
+            {
+                double x = a + i * step;
+                xValues.Add(x);
+                yValues.Add(function(x));
+            }
+
+            // Create the line series for the function curve (more dense points for smoothness)
+            var smoothX = new List<double>();
+            var smoothY = new List<double>();
+            int smoothPoints = 200;
+            double smoothStep = (b - a) / (smoothPoints - 1);
+            for (int i = 0; i < smoothPoints; i++)
+            {
+                double x = a + i * smoothStep;
+                smoothX.Add(x);
+                smoothY.Add(function(x));
+            }
+
+            var functionLineSeries = new LineSeries<ObservablePoint>
+            {
+                DataPadding = new LvcPoint(0, 0),
+                GeometryStroke = null,
+                Stroke = new SolidColorPaint(SKColors.LightGray) { StrokeThickness = 3 },
+                GeometryFill = null,
+               
+                Values = new ObservableCollection<ObservablePoint>(
+                    smoothX.Zip(smoothY, (x, y) => new ObservablePoint(x, y)).ToList()
+                ),
+                Name = title
+            };
+
+            // Create scatter points for the sampled points Simpson uses
+            var simpsonPointsSeries = new LineSeries<ObservablePoint>
+            {
+                GeometrySize = 10,
+                GeometryFill = new SolidColorPaint(SKColors.Red),
+                Stroke = null,
+                Values = new ObservableCollection<ObservablePoint>(
+                    xValues.Zip(yValues, (x, y) => new ObservablePoint(x, y)).ToList()
+                ),
+                Name = "Sample Points"
+            };
+
+            // Create the chart with both series
+            var chart = new CartesianChart
+            {
+                Series = new ISeries[] { functionLineSeries, simpsonPointsSeries },
+                Height = 400,
+                Width = 600,
+                Background = new SolidColorBrush(Colors.Transparent),
+                Margin = new Thickness(0, 10, 0, 10),
+                HorizontalAlignment = HorizontalAlignment.Center,
+                LegendPosition = LiveChartsCore.Measure.LegendPosition.Bottom
+            };
+
+            return chart;
+        }
+
+
+
+
 
 
         /// <summary>
